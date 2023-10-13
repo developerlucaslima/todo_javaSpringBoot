@@ -16,6 +16,13 @@ public class UserController {
 
   @PostMapping("/")
   public ResponseEntity create(@RequestBody UserModel userModel) {
-    var user = this.userRepository.findByUserName(userModel.getUsername());
+    var user = this.userRepository.findByUsername(userModel.getUsername());
+
+    if (user != null) {
+      return ResponseEntity.status(400).body("User already exists!");
+    }
+
+    var userCreated = this.userRepository.save(userModel);
+    return ResponseEntity.status(200).body(userCreated);
   }
 }
