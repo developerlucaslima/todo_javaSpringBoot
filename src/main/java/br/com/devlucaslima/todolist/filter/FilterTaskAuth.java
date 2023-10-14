@@ -3,21 +3,27 @@ package br.com.devlucaslima.todolist.filter;
 import java.io.IOException;
 
 import org.springframework.stereotype.Component;
+import org.springframework.web.filter.OncePerRequestFilter;
 
-import jakarta.servlet.Filter;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Component
-public class FilterTaskAuth implements Filter {
+public class FilterTaskAuth extends OncePerRequestFilter {
 
   @Override
-  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-      throws IOException, ServletException {
+  protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+      throws ServletException, IOException {
 
-        System.out.println("Arrived on filter");
-        chain.doFilter(request, response);
+        //get authentication (username and password)
+        var authorization = request.getHeader("Authorization");
+
+        var user_password = authorization.substring("Basic".length()).trim();
+        //validate username and password
+
+        filterChain.doFilter(request, response);
   }
+
 }
