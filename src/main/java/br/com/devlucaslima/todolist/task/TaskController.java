@@ -1,9 +1,17 @@
 package br.com.devlucaslima.todolist.task;
 
+import java.time.LocalDateTime;
+import java.util.UUID;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping("/tasks")
@@ -12,9 +20,26 @@ public class TaskController {
   @Autowired
   private ITaskRepository taskRepository;
 
-  public TaskModel create(@RequestBody TaskModel taskModel) {
+  @PostMapping("/")
+  public ResponseEntity create(@RequestBody TaskModel taskModel, HttpServletRequest request) {
+    var userId = request.getAttribute("userId");
+    taskModel.setUserId((UUID) userId);
+
+    var currentDate = LocalDateTime.now();
+    if (currentDate.isAfter(taskModel.getStartAt())) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be equal to or newer than current date");
+    } 
+
+    if (currentDate.isAfter(taskModel.getEndAt())) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Final date must be newer than current date");
+    }
+
+    if (taskModel.getStartAt().isAfter(taskModel.getEndAt())) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be older than final date");
+    }
+
     var task = this.taskRepository.save(taskModel);
-    return task;
+    return ResponseEntity.status(HttpStatus.OK).body(task);
   }
   
 }
