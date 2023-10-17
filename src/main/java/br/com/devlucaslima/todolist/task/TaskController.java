@@ -34,11 +34,9 @@ public class TaskController {
     if (currentDate.isAfter(taskModel.getStartAt())) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be equal to or newer than current date");
     } 
-
     if (currentDate.isAfter(taskModel.getEndAt())) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Final date must be newer than current date");
     }
-
     if (taskModel.getStartAt().isAfter(taskModel.getEndAt())) {
       return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be older than final date");
     }
