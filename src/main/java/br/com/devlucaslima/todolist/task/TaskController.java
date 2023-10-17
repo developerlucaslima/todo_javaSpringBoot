@@ -32,13 +32,13 @@ public class TaskController {
 
     var currentDate = LocalDateTime.now();
     if (currentDate.isAfter(taskModel.getStartAt())) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be equal to or newer than current date");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be equal to or newer than current date.");
     } 
     if (currentDate.isAfter(taskModel.getEndAt())) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Final date must be newer than current date");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Final date must be newer than current date.");
     }
     if (taskModel.getStartAt().isAfter(taskModel.getEndAt())) {
-      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be older than final date");
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Initial date must be older than final date.");
     }
 
     var task = this.taskRepository.save(taskModel);
@@ -53,11 +53,20 @@ public class TaskController {
   }
 
   @PutMapping("/{id}")
-  public TaskModel update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
+  public ResponseEntity update(@RequestBody TaskModel taskModel, @PathVariable UUID id, HttpServletRequest request) {
     var task = this.taskRepository.findById(id).orElse(null);
+    var userId = request.getAttribute("userId");
+
+     if (task == null) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Task not found.");
+    }
+
+    if (!task.getUserId().equals(userId)) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Acess denied for user!");
+    }
 
     Utils.copyNonNullProperties(taskModel, task);
 
-    return this.taskRepository.save(task);
+    return ResponseEntity.ok().body(this.taskRepository.save(task));
   }
 }
